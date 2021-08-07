@@ -132,16 +132,10 @@ Widget _buildOverlay(BuildContext context, ElementData data) {
                     onSizeChanged: (size) {
                       data.childSize = size;
                     },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black87),
-                      ),
-                      padding: const EdgeInsets.all(20),
-                      child: Text(
-                        data.controller.text,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: _baseFontSize * data.scale),
-                      ),
+                    child: Text(
+                      data.controller.text,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: _baseFontSize * data.scale),
                     ),
                   ),
                 ),
