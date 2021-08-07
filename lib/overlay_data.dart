@@ -71,7 +71,10 @@ Widget _buildOverlay(BuildContext context, ElementData data) {
                 data.focus.requestFocus();
                 overlay.markNeedsBuild();
               },
-              style: TextStyle(fontSize: _baseFontSize * data.scale),
+              style: TextStyle(
+                fontSize: _baseFontSize * data.scale,
+                color: Colors.white,
+              ),
             ),
           ),
         )
@@ -135,7 +138,10 @@ Widget _buildOverlay(BuildContext context, ElementData data) {
                     child: Text(
                       data.controller.text,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: _baseFontSize * data.scale),
+                      style: TextStyle(
+                        fontSize: _baseFontSize * data.scale,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),

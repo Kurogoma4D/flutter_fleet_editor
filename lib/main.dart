@@ -49,7 +49,31 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-    )
+    ),
+    RadialGradient(
+      colors: [
+        Color(0xff263238),
+        Color(0xff37474F),
+      ],
+    ),
+    RadialGradient(
+      colors: [
+        Color(0xff424242),
+        Color(0xff212121),
+      ],
+    ),
+    RadialGradient(
+      colors: [
+        Color(0xffAD1457),
+        Color(0xffD32F2F),
+      ],
+    ),
+    RadialGradient(
+      colors: [
+        Color(0xff26A69A),
+        Color(0xff0097A7),
+      ],
+    ),
   ];
 
   int colorIndex = 0;
