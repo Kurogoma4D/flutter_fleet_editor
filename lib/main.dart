@@ -7,6 +7,52 @@ import 'package:flutter/rendering.dart';
 
 final _repaint = GlobalKey();
 
+final _colors = [
+  LinearGradient(
+    colors: [
+      Color.fromRGBO(1, 137, 181, 1),
+      Color.fromRGBO(80, 80, 245, 1),
+      Color.fromRGBO(50, 236, 220, 1),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  ),
+  LinearGradient(
+    colors: [
+      Color.fromRGBO(34, 193, 195, 1),
+      Color.fromRGBO(253, 187, 45, 1),
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  ),
+  RadialGradient(
+    colors: [
+      Color(0xff263238),
+      Color(0xff37474F),
+    ],
+  ),
+  RadialGradient(
+    colors: [
+      Color(0xff424242),
+      Color(0xff212121),
+    ],
+  ),
+  RadialGradient(
+    colors: [
+      Color(0xffAD1457),
+      Color(0xffD32F2F),
+    ],
+  ),
+  RadialGradient(
+    colors: [
+      Color(0xff26A69A),
+      Color(0xff0097A7),
+    ],
+  ),
+];
+
+final _colorIndex = ValueNotifier(0);
+
 void main() {
   runApp(MyApp());
 }
@@ -32,51 +78,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final colors = [
-    LinearGradient(
-      colors: [
-        Color.fromRGBO(1, 137, 181, 1),
-        Color.fromRGBO(80, 80, 245, 1),
-        Color.fromRGBO(50, 236, 220, 1),
-      ],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    ),
-    LinearGradient(
-      colors: [
-        Color.fromRGBO(34, 193, 195, 1),
-        Color.fromRGBO(253, 187, 45, 1),
-      ],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    ),
-    RadialGradient(
-      colors: [
-        Color(0xff263238),
-        Color(0xff37474F),
-      ],
-    ),
-    RadialGradient(
-      colors: [
-        Color(0xff424242),
-        Color(0xff212121),
-      ],
-    ),
-    RadialGradient(
-      colors: [
-        Color(0xffAD1457),
-        Color(0xffD32F2F),
-      ],
-    ),
-    RadialGradient(
-      colors: [
-        Color(0xff26A69A),
-        Color(0xff0097A7),
-      ],
-    ),
-  ];
-
-  int colorIndex = 0;
   bool isProcessing = false;
 
   @override
@@ -86,17 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: RepaintBoundary(
-              key: _repaint,
-              child: Navigator(
-                onGenerateRoute: (settings) => MaterialPageRoute(
-                  builder: (context) => Canvas(
-                    colorIndex: colorIndex,
-                    colors: colors,
-                  ),
-                ),
-              ),
-            ),
+            child: const CanvasBase(),
           ),
           Positioned(
             bottom: 16,
@@ -112,11 +103,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 children: [
-                  for (final color in colors) ...[
+                  for (final color in _colors) ...[
                     GestureDetector(
-                      onTap: () => setState(() {
-                        colorIndex = colors.indexOf(color);
-                      }),
+                      onTap: () => _colorIndex.value = _colors.indexOf(color),
                       child: Container(
                         height: 48,
                         width: 48,
@@ -140,24 +129,27 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.download),
-        onPressed: () async {
-          setState(() {
-            isProcessing = true;
-          });
+        onPressed: !isProcessing
+            ? () async {
+                setState(() {
+                  isProcessing = true;
+                });
 
-          final boundary = _repaint.currentContext!.findRenderObject()
-              as RenderRepaintBoundary;
-          final image = await boundary.toImage();
+                final boundary = _repaint.currentContext!.findRenderObject()
+                    as RenderRepaintBoundary;
+                final image = await boundary.toImage();
 
-          final byteData = await image.toByteData(format: ImageByteFormat.png);
-          final binary = byteData!.buffer.asUint8List();
+                final byteData =
+                    await image.toByteData(format: ImageByteFormat.png);
+                final binary = byteData!.buffer.asUint8List();
 
-          download(binary);
+                download(binary);
 
-          setState(() {
-            isProcessing = false;
-          });
-        },
+                setState(() {
+                  isProcessing = false;
+                });
+              }
+            : null,
       ),
     );
   }
@@ -170,6 +162,28 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     super.dispose();
+  }
+}
+
+class CanvasBase extends StatelessWidget {
+  const CanvasBase({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      key: _repaint,
+      child: Navigator(
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          builder: (context) => ValueListenableBuilder<int>(
+            valueListenable: _colorIndex,
+            builder: (context, value, _) => Canvas(
+              colorIndex: value,
+              colors: _colors,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
