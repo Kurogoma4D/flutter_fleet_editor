@@ -126,8 +126,10 @@ Widget _buildOverlay(BuildContext context, ElementData data) {
                   }
                 },
                 onTap: (_) {
+                  final overlay = _overlayFromElement(data);
                   data.isEditMode = true;
                   data.focus.requestFocus();
+                  overlay.markNeedsBuild();
                 },
                 child: Transform.rotate(
                   angle: -data.rotation,
