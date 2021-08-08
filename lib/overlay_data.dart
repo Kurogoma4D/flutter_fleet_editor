@@ -5,7 +5,7 @@ import 'package:gesture_x_detector/gesture_x_detector.dart';
 
 final List<OverlayData> overlays = [];
 
-const _baseFontSize = 60;
+const _baseFontSize = 60.0;
 
 @immutable
 class OverlayData {
@@ -31,6 +31,10 @@ class ElementData {
   bool isEditMode = false;
   Size childSize = Size.zero;
   DateTime tapTimeStamp = DateTime(0);
+  TextStyle style = TextStyle(
+    fontSize: _baseFontSize,
+    color: Colors.white,
+  );
 
   final focus = FocusNode();
   late final controller = TextEditingController();
@@ -50,32 +54,68 @@ class ElementData {
 Widget _buildOverlay(BuildContext context, ElementData data) {
   return data.isEditMode
       ? Material(
-          color: Colors.black26,
-          child: Center(
-            child: TextField(
-              controller: data.controller,
-              focusNode: data.focus,
-              decoration: InputDecoration(border: InputBorder.none),
-              textAlign: TextAlign.center,
-              onEditingComplete: () {
-                final overlay = _overlayFromElement(data);
+          color: Colors.black45,
+          child: Column(
+            children: [
+              Spacer(),
+              Flexible(
+                child: TextField(
+                  controller: data.controller,
+                  focusNode: data.focus,
+                  decoration: InputDecoration(border: InputBorder.none),
+                  textAlign: TextAlign.center,
+                  onEditingComplete: () {
+                    final overlay = _overlayFromElement(data);
 
-                if (data.controller.text.isEmpty) {
-                  overlay.remove();
-                  overlays.removeWhere((element) => element.overlay == overlay);
-                  return;
-                }
+                    if (data.controller.text.isEmpty) {
+                      overlay.remove();
+                      overlays
+                          .removeWhere((element) => element.overlay == overlay);
+                      data.focus.unfocus();
 
-                data.focus.unfocus();
-                data.isEditMode = false;
-                data.focus.requestFocus();
-                overlay.markNeedsBuild();
-              },
-              style: TextStyle(
-                fontSize: _baseFontSize * data.scale,
-                color: Colors.white,
+                      return;
+                    }
+
+                    data.isEditMode = false;
+                    data.focus.unfocus();
+                    overlay.markNeedsBuild();
+                  },
+                  style: data.style,
+                ),
               ),
-            ),
+              const SizedBox(height: 60),
+              Expanded(
+                child: Wrap(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        final overlay = _overlayFromElement(data);
+
+                        data.style = data.style.copyWith(
+                          fontWeight: data.style.fontWeight == FontWeight.bold
+                              ? FontWeight.normal
+                              : FontWeight.bold,
+                        );
+                        overlay.markNeedsBuild();
+                      },
+                      child: Image.asset('assets/images/bold.png'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        final overlay = _overlayFromElement(data);
+
+                        data.style = data.style.copyWith(
+                            fontStyle: data.style.fontStyle == FontStyle.italic
+                                ? FontStyle.normal
+                                : FontStyle.italic);
+                        overlay.markNeedsBuild();
+                      },
+                      child: Image.asset('assets/images/italic.png'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         )
       : Positioned(
@@ -90,6 +130,8 @@ Widget _buildOverlay(BuildContext context, ElementData data) {
                 final overlay = _overlayFromElement(data);
 
                 data.scale += signal.scrollDelta.dy * 0.01;
+                data.style =
+                    data.style.copyWith(fontSize: _baseFontSize * data.scale);
                 data.rotation -= signal.scrollDelta.dx * 0.01;
 
                 overlay.markNeedsBuild();
@@ -103,6 +145,8 @@ Widget _buildOverlay(BuildContext context, ElementData data) {
                 onScaleUpdate: (details) {
                   final overlay = _overlayFromElement(data);
                   data.scale = data.baseScale * details.scale;
+                  data.style =
+                      data.style.copyWith(fontSize: _baseFontSize * data.scale);
                   data.rotation = data.baseRotation + details.rotationAngle;
                   overlay.markNeedsBuild();
                 },
@@ -140,10 +184,7 @@ Widget _buildOverlay(BuildContext context, ElementData data) {
                     child: Text(
                       data.controller.text,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: _baseFontSize * data.scale,
-                        color: Colors.white,
-                      ),
+                      style: data.style,
                     ),
                   ),
                 ),
