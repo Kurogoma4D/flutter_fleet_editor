@@ -136,55 +136,61 @@ Widget _buildOverlay(BuildContext context, ElementData data) {
 
                 overlay.markNeedsBuild();
               },
-              child: XGestureDetector(
-                bypassTapEventOnDoubleTap: true,
-                onScaleStart: (details) {
-                  data.baseScale = data.scale;
-                  data.baseRotation = data.rotation;
-                },
-                onScaleUpdate: (details) {
-                  final overlay = _overlayFromElement(data);
-                  data.scale = data.baseScale * details.scale;
-                  data.style =
-                      data.style.copyWith(fontSize: _baseFontSize * data.scale);
-                  data.rotation = data.baseRotation + details.rotationAngle;
-                  overlay.markNeedsBuild();
-                },
-                onMoveUpdate: (event) {
-                  final overlay = _overlayFromElement(data);
-                  data.position = event.position;
-                  overlay.markNeedsBuild();
-                },
-                onMoveStart: (_) {
-                  data.tapTimeStamp = DateTime.now();
-                },
-                onMoveEnd: (_) {
-                  if (DateTime.now()
-                          .difference(data.tapTimeStamp)
-                          .inMilliseconds <
-                      100) {
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(
+                  scrollbars: false,
+                  physics: AlwaysScrollableScrollPhysics(),
+                ),
+                child: XGestureDetector(
+                  bypassTapEventOnDoubleTap: true,
+                  onScaleStart: (details) {
+                    data.baseScale = data.scale;
+                    data.baseRotation = data.rotation;
+                  },
+                  onScaleUpdate: (details) {
+                    final overlay = _overlayFromElement(data);
+                    data.scale = data.baseScale * details.scale;
+                    data.style = data.style
+                        .copyWith(fontSize: _baseFontSize * data.scale);
+                    data.rotation = data.baseRotation + details.rotationAngle;
+                    overlay.markNeedsBuild();
+                  },
+                  onMoveUpdate: (event) {
+                    final overlay = _overlayFromElement(data);
+                    data.position = event.position;
+                    overlay.markNeedsBuild();
+                  },
+                  onMoveStart: (_) {
+                    data.tapTimeStamp = DateTime.now();
+                  },
+                  onMoveEnd: (_) {
+                    if (DateTime.now()
+                            .difference(data.tapTimeStamp)
+                            .inMilliseconds <
+                        100) {
+                      final overlay = _overlayFromElement(data);
+                      data.isEditMode = true;
+                      data.focus.requestFocus();
+                      overlay.markNeedsBuild();
+                    }
+                  },
+                  onTap: (_) {
                     final overlay = _overlayFromElement(data);
                     data.isEditMode = true;
                     data.focus.requestFocus();
                     overlay.markNeedsBuild();
-                  }
-                },
-                onTap: (_) {
-                  final overlay = _overlayFromElement(data);
-                  data.isEditMode = true;
-                  data.focus.requestFocus();
-                  overlay.markNeedsBuild();
-                },
-                child: Transform.rotate(
-                  angle: -data.rotation,
-                  child: SizeListenableContainer(
-                    onSizeChanged: (size) {
-                      data.childSize = size;
-                    },
-                    child: Text(
-                      data.controller.text,
-                      textAlign: TextAlign.center,
-                      style: data.style,
+                  },
+                  child: Transform.rotate(
+                    angle: -data.rotation,
+                    child: SizeListenableContainer(
+                      onSizeChanged: (size) {
+                        data.childSize = size;
+                      },
+                      child: Text(
+                        data.controller.text,
+                        textAlign: TextAlign.center,
+                        style: data.style,
+                      ),
                     ),
                   ),
                 ),
